@@ -1,0 +1,14 @@
+node1 = 0xdf440C7a8d6988Da47918EBB4f07D083674D7367
+password = 123
+
+node2 = 0xb1C8A826d009119325E59F10812CfA0a67452736
+password = 123
+
+enode = enode://f57df71d3d9a4aa4c6345d2b7f7d396c0947d2383c0341b144d69d02575c5c4945516efb0ff89102f16b14dcfb19041a44163a4bb299beb2d371caa55a310cad@127.0.0.1:0?discport=30301
+
+Run Bootnode
+bootnode -nodekey boot.key -verbosity 7 -addr "127.0.0.1:30301"
+
+Run Node 1
+cd node1
+geth --datadir "./data"  --port 30304 --bootnodes enode://f57df71d3d9a4aa4c6345d2b7f7d396c0947d2383c0341b144d69d02575c5c4945516efb0ff89102f16b14dcfb19041a44163a4bb299beb2d371caa55a310cad@127.0.0.1:0?discport=30301 --authrpc.port 8547 --ipcdisable --allow-insecure-unlock  --http --http.corsdomain="https://remix.ethereum.org, http://127.0.0.1:8000" --http.api web3,eth,debug,personal,net --networkid 1234567 --unlock 0xdf440C7a8d6988Da47918EBB4f07D083674D7367 --password password.txt  --mine --miner.etherbase=0xdf440C7a8d6988Da47918EBB4f07D083674D7367
