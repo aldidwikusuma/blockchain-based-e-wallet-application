@@ -58,8 +58,8 @@ export const deployTokenContract = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-export const deployWalletTransactionContract = async (req, res) => {
-  const contractName = "WalletTransactionContract";
+export const deployTransactionWalletContract = async (req, res) => {
+  const contractName = "TransactionWalletContract";
   try {
     const result = await deploySmartContract(contractName);
     // return res.status(200).json({

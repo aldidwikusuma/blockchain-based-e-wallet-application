@@ -12,6 +12,7 @@
             <script>
                 $(document).on('click', '.accept-modal', function() {
                     let id = $(this).data('id');
+                    let amount = $("#amount").val();
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "You want to accept this wallet transaction request?",
@@ -25,8 +26,15 @@
                             $.ajax({
                                 url: "{{ route('dashboard.admin.wallet-transaction.accept') }}",
                                 type: 'POST',
+                                // headers: {
+                                //     'Authorization': 'Bearer {{ config('API_TOKEN') }}',
+                                // },
                                 data: {
-                                    id: id
+                                    id: id,
+                                    // transactionType: "Top Up",
+                                    // status: "Accepted",
+                                    amount: amount,
+                                    // createdAt: createdAt,
                                 },
                                 success: function(response) {
                                     Swal.fire(
@@ -63,6 +71,9 @@
                             $.ajax({
                                 url: "{{ route('dashboard.admin.wallet-transaction.reject') }}",
                                 type: 'POST',
+                                // headers: {
+                                //     'Authorization': 'Bearer abc'
+                                // },
                                 data: {
                                     id: id
                                 },

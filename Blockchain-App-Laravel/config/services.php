@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'express_api' => [
+        'base_url' => env('BASE_API_URL'),
+        'token' => env('API_TOKEN'),
+    ],
 ];

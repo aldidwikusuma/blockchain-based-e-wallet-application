@@ -25,10 +25,23 @@ echo ""
 
 # Kill any process using port 5000
 PORT=5000
+echo "Listing processes using port $PORT before attempting to kill:"
+lsof -i:$PORT
+
 if lsof -i:$PORT -t >/dev/null 2>&1; then
     echo "Port $PORT is in use. Stopping process..."
     kill -9 $(lsof -i:$PORT -t)
+    sleep 5  # Allow time for the process to terminate
 fi
+
+# Check again if the port is still in use
+if lsof -i:$PORT -t >/dev/null 2>&1; then
+    echo -e "\e[31mPort $PORT is still in use after attempting to stop the process. Exiting...\e[0m"
+    exit 1
+fi
+
+echo "Listing processes using port $PORT after attempting to kill:"
+lsof -i:$PORT
 
 # Start the npm process
 echo "Starting npm process..."
@@ -59,7 +72,7 @@ echo "Waiting for smart contracts to be deployed..."
 show_animation &
 ANIMATION_PID=$!
 
-while ! (grep -q "TransactionContract deployed successfully at address:" log_script/npm_output.log && grep -q "TokenContract deployed successfully at address:" log_script/npm_output.log); do
+while ! (grep -q "TransactionContract deployed successfully at address:" log_script/npm_output.log && grep -q "TokenContract deployed successfully at address:" log_script/npm_output.log && grep -q "TransactionWalletContract deployed successfully at address:" log_script/npm_output.log); do
     sleep 1
 done
 
@@ -69,6 +82,7 @@ wait $ANIMATION_PID 2>/dev/null
 # Extract contract addresses from the log
 TRANSACTION_CONTRACT_ADDRESS=$(grep -oP 'TransactionContract deployed successfully at address: \K(0x[0-9a-fA-F]+)' log_script/npm_output.log)
 TOKEN_CONTRACT_ADDRESS=$(grep -oP 'TokenContract deployed successfully at address: \K(0x[0-9a-fA-F]+)' log_script/npm_output.log)
+WALLET_TRANSACTION_CONTRACT_ADDRESS=$(grep -oP 'WalletTransactionContract deployed successfully at address: \K(0x[0-9a-fA-F]+)' log_script/npm_output.log)
 
 # Get current timestamp
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
@@ -81,12 +95,13 @@ NC='\e[0m' # No Color
 LOG_FILE="log_script/deploy.log"
 echo "----------------------------------------" | tee -a $LOG_FILE
 echo -e "${GREEN}## DEPLOYMENT DETAILS ## ${NC}"
-# ${GREEN}Deployment Details${NC}"
 echo "Deployment Details" >> $LOG_FILE
 echo -e "${GREEN}TransactionContract deployed at: $TRANSACTION_CONTRACT_ADDRESS${NC}"
 echo "TransactionContract deployed at: $TRANSACTION_CONTRACT_ADDRESS" >> $LOG_FILE
 echo -e "${GREEN}TokenContract deployed at: $TOKEN_CONTRACT_ADDRESS${NC}"
 echo "TokenContract deployed at: $TOKEN_CONTRACT_ADDRESS" >> $LOG_FILE
+echo -e "${GREEN}WalletTransactionContract deployed at: $WALLET_TRANSACTION_CONTRACT_ADDRESS${NC}"
+echo "WalletTransactionContract deployed at: $WALLET_TRANSACTION_CONTRACT_ADDRESS" >> $LOG_FILE
 echo -e "${GREEN}Deployment timestamp: $TIMESTAMP${NC}"
 echo "Deployment timestamp: $TIMESTAMP" >> $LOG_FILE
 echo "----------------------------------------" | tee -a $LOG_FILE
@@ -103,6 +118,7 @@ cp .env.backup $ENV_FILE
 echo "Updating $ENV_FILE..."
 sed -i "s/^CONTRACT_ADDRESS_TRANSACTION = .*/CONTRACT_ADDRESS_TRANSACTION = \"$TRANSACTION_CONTRACT_ADDRESS\"/g" $ENV_FILE
 sed -i "s/^CONTRACT_ADDRESS_TOKEN = .*/CONTRACT_ADDRESS_TOKEN = \"$TOKEN_CONTRACT_ADDRESS\"/g" $ENV_FILE
+sed -i "s/^CONTRACT_ADDRESS_WALLET_TRANSACTION = .*/CONTRACT_ADDRESS_WALLET_TRANSACTION = \"$WALLET_TRANSACTION_CONTRACT_ADDRESS\"/g" $ENV_FILE
 echo -e "${GREEN}$ENV_FILE updated${NC}"
 
 echo ""
@@ -111,6 +127,22 @@ echo ""
 echo -e "${GREEN}STARTING NPM RUN DEV PROCESS...${NC}"
 show_animation &
 ANIMATION_PID=$!
+
+# Kill any process using port 5000 again to ensure it is free
+if lsof -i:$PORT -t >/dev/null 2>&1; then
+    echo "Port $PORT is still in use. Stopping process again..."
+    kill -9 $(lsof -i:$PORT -t)
+    sleep 5  # Allow time for the process to terminate
+fi
+
+# Check again if the port is still in use before starting npm run dev
+if lsof -i:$PORT -t >/dev/null 2>&1; then
+    echo -e "\e[31mPort $PORT is still in use after attempting to stop the process. Exiting...\e[0m"
+    exit 1
+fi
+
+echo "Listing processes using port $PORT before starting npm run dev:"
+lsof -i:$PORT
 
 if npm run dev; then
     kill $ANIMATION_PID

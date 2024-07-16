@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import TransactionRoute from "./routes/transactionRoute.js";
 import TransactionDetailRoute from "./routes/transactionDetailRoute.js";
+import TransactionWalletRoute from "./routes/transactionWalletRoute.js";
 import TokenRoute from "./routes/tokenRoute.js";
-import Web3Route from "./routes/web3Route.js";
+// import Web3Route from "./routes/web3Route.js";
 import { compileContracts } from "./services/web3Service.js";
 
 // import for testing route
@@ -22,6 +23,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api/transactions", TransactionRoute);
 app.use("/api/transaction-details", TransactionDetailRoute);
 app.use("/api/tokens", TokenRoute);
+app.use("/api/wallet", TransactionWalletRoute);
+
 // app.use("/web3", Web3Route);
 
 // route for testing

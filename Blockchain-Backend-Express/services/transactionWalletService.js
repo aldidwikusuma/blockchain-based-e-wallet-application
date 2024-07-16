@@ -4,12 +4,13 @@ import { consoleForDevelop } from "../config/app.js";
 export const getAllWalletTransaction = async () => {
   consoleForDevelop("Get Transactions Process [Service]");
   const contract = await createContractInstance("wallet");
-  const wallet = await contract.methods.getAllWalletTransactions().call();
+  const transactions = await contract.methods.getAllWalletTransactions().call();
 
-  const mappedTransactions = wallet.map((wallet) => {
+  const mappedTransactions = transactions.map((wallet) => {
     return {
       userId: wallet.userId,
       amount: wallet.amount.toString(),
+      paymentMethodDetailId: wallet.paymentMethodDetailId.toString(),
       transactionType: wallet.transactionType,
       status: wallet.status,
       code: wallet.code,
@@ -26,6 +27,7 @@ export const addWalletTransaction = async (req) => {
   const {
     userId,
     amount,
+    paymentMethodDetailId,
     transactionType,
     status,
     code,
@@ -34,6 +36,7 @@ export const addWalletTransaction = async (req) => {
   let arrayParams = [
     userId,
     amount,
+    paymentMethodDetailId,
     transactionType,
     status,
     code,
@@ -55,14 +58,15 @@ export const addWalletTransaction = async (req) => {
 export const getWalletTransactionByUserId = async (userId) => {
   consoleForDevelop("Get Transaction by UserId Process [Service]");
   const contract = await createContractInstance("wallet");
-  const wallet = await contract.methods
+  const transactions = await contract.methods
     .getWalletTransactionsByUserId(userId)
     .call();
 
-  const mappedTransactions = wallet.map((wallet) => {
+  const mappedTransactions = transactions.map((wallet) => {
     return {
       userId: wallet.userId,
       amount: wallet.amount.toString(),
+      paymentMethodDetailId: wallet.paymentMethodDetailId.toString(),
       transactionType: wallet.transactionType,
       status: wallet.status,
       code: wallet.code,
@@ -74,10 +78,10 @@ export const getWalletTransactionByUserId = async (userId) => {
   return mappedTransactions;
 };
 
-export const getWalletCountTransaction = async () => {
+export const getCountWalletTransaction = async () => {
   consoleForDevelop("Get Count Transaction Process [Service]");
   const contract = await createContractInstance("wallet");
-  const count = await contract.methods.getWalletCountTransaction().call();
+  const count = await contract.methods.getCountWalletTransaction().call();
   consoleForDevelop("Transaction count fetched successfully", "footer");
   return count.toString();
 };

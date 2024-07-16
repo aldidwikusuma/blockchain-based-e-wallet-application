@@ -3,7 +3,7 @@ import {
   deployTransactionContract,
   deployTransactionDetailContract,
   deployTokenContract,
-  deployWalletTransactionContract,
+  deployTransactionWalletContract,
 } from "../controllers/web3Controller.js";
 
 import { validateTokenDeploySmartContract } from "../middleware/validateToken.js";
@@ -15,6 +15,6 @@ router.use(validateTokenDeploySmartContract);
 router.get("/deploy/transaction", deployTransactionContract);
 router.get("/deploy/transaction-detail", deployTransactionDetailContract);
 router.get("/deploy/token", deployTokenContract);
-router.get("/deploy/wallet", deployWalletTransactionContract);
+router.get("/deploy/wallet", deployTransactionWalletContract);
 
 export default router;

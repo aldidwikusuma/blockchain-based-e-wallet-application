@@ -17,7 +17,7 @@ import {
   deployTransactionContract,
   deployTransactionDetailContract,
   deployTokenContract,
-  deployWalletTransactionContract,
+  deployTransactionWalletContract,
 } from "../controllers/web3Controller.js";
 import { consoleForDevelop } from "../config/app.js";
 
@@ -61,11 +61,11 @@ export const compileContracts = async () => {
         deployFunction: deployTokenContract,
       },
       {
-        name: "WalletTransactionContract",
+        name: "TransactionWalletContract",
         filename: "TransactionWalletContract.sol",
-        abiFileName: "WalletTransactionContractABI.json",
-        bytecodeFileName: "WalletTransactionContractBytecode.txt",
-        deployFunction: deployWalletTransactionContract,
+        abiFileName: "TransactionWalletContractABI.json",
+        bytecodeFileName: "TransactionWalletContractBytecode.txt",
+        deployFunction: deployTransactionWalletContract,
       },
       // Add more contracts as needed
     ];
@@ -100,6 +100,9 @@ export const compileContracts = async () => {
         };
 
         const output = JSON.parse(solc.compile(JSON.stringify(input)));
+        
+        // Debugging: Print the entire output object
+        console.log(`Output for ${contract.filename}:`, JSON.stringify(output, null, 2));
 
         if (output.errors) {
           output.errors.forEach((err) => {
@@ -108,8 +111,12 @@ export const compileContracts = async () => {
           throw new Error(`Compilation failed for ${contract.name}`);
         }
 
-        const compiledContract =
-          output.contracts[contract.filename][contract.name];
+        const compiledContract = output.contracts[contract.filename][contract.name];
+        
+        // Check if compiledContract is undefined
+        if (!compiledContract) {
+          throw new Error(`Compiled contract for ${contract.name} not found. Check the contract name and filename.`);
+        }
 
         // Write ABI to file
         fs.writeFileSync(
@@ -190,6 +197,10 @@ export const deploySmartContract = async (contractName) => {
 
 const validateUseFor = (useFor) => {
   let abiPath;
+  if (useFor === "wallet") {
+    abiPath = path.resolve(buildPath, "TransactionWalletContractABI.json");
+    return [JSON.parse(fs.readFileSync(abiPath)), CONTRACT_ADDRESS_WALLET_TRANSACTION];
+    }
   if (useFor === "transaction") {
     abiPath = path.resolve(buildPath, "TransactionContractABI.json");
     // console.log(JSON.parse(fs.readFileSync(abiPath)));
@@ -206,38 +217,81 @@ const validateUseFor = (useFor) => {
     abiPath = path.resolve(buildPath, "TokenContractABI.json");
     return [JSON.parse(fs.readFileSync(abiPath)), CONTRACT_ADDRESS_TOKEN];
   }
-  if (useFor === "wallet") {
-  abiPath = path.resolve(buildPath, "WalletTransactionContractABI.json");
-  return [JSON.parse(fs.readFileSync(abiPath)), CONTRACT_ADDRESS_WALLET_TRANSACTION];
-  }
   throw new Error("Invalid useFor value");
 };
+
+// export const createContractInstance = async (useFor) => {
+//   consoleForDevelop("Create Contract Instance Process [Web3 Service]");
+//   const [abiUsed, contractAddressUsed] = validateUseFor(useFor);
+//   const contract = new web3.eth.Contract(abiUsed, contractAddressUsed);
+//   return contract;
+// };
 
 export const createContractInstance = async (useFor) => {
   consoleForDevelop("Create Contract Instance Process [Web3 Service]");
   const [abiUsed, contractAddressUsed] = validateUseFor(useFor);
+  console.log("Creating contract instance with ABI:", abiUsed, "and address:", contractAddressUsed);
   const contract = new web3.eth.Contract(abiUsed, contractAddressUsed);
   return contract;
 };
 
+// export const sendRawTx = async (arrayParams, method, useFor) => {
+//   consoleForDevelop("Send Raw Transaction Process [SendRawTx Web3 Service]");
+//   try {
+//     const [abiUsed, contractAddressUsed] = validateUseFor(useFor);
+//     const nonce = await web3.eth.getTransactionCount(WALLET_ADDRESS);
+//     let gasPrice = await web3.eth.getGasPrice();
+//     // if (useFor === "transactionDetail") {
+//     //   gasPrice = gasPrice.toString() * 2;
+//     // }
+//     // if (useFor === "token") {
+//     //   gasPrice = gasPrice.toString() * 3;
+//     // }
+//     const gasLimit = 10000000;
+//     const contract = new web3.eth.Contract(abiUsed, contractAddressUsed);
+//     const data = contract.methods[method](...arrayParams).encodeABI();
+
+//     // Set transactionPollingTimeout here (example: 60000 ms = 1 minute)
+//     // web3.eth.transactionPollingTimeout = 60000;
+
+//     const rawTx = {
+//       nonce: web3.utils.toHex(nonce),
+//       gasPrice: web3.utils.toHex(gasPrice),
+//       gasLimit: web3.utils.toHex(gasLimit),
+//       to: contractAddressUsed,
+//       value: "0x00",
+//       data: data,
+//     };
+
+//     const signedTx = await web3.eth.accounts.signTransaction(
+//       rawTx,
+//       PRIVATE_KEY
+//     );
+
+//     const sentTx = await web3.eth.sendSignedTransaction(
+//       signedTx.rawTransaction
+//     );
+//     return sentTx;
+//   } catch (error) {
+//     console.error("Error sending raw transaction:", error);
+//     throw error;
+//   }
+// };
+
 export const sendRawTx = async (arrayParams, method, useFor) => {
   consoleForDevelop("Send Raw Transaction Process [SendRawTx Web3 Service]");
   try {
+    
     const [abiUsed, contractAddressUsed] = validateUseFor(useFor);
     const nonce = await web3.eth.getTransactionCount(WALLET_ADDRESS);
     let gasPrice = await web3.eth.getGasPrice();
-    // if (useFor === "transactionDetail") {
-    //   gasPrice = gasPrice.toString() * 2;
-    // }
-    // if (useFor === "token") {
-    //   gasPrice = gasPrice.toString() * 3;
-    // }
     const gasLimit = 10000000;
     const contract = new web3.eth.Contract(abiUsed, contractAddressUsed);
-    const data = contract.methods[method](...arrayParams).encodeABI();
 
-    // Set transactionPollingTimeout here (example: 60000 ms = 1 minute)
-    // web3.eth.transactionPollingTimeout = 60000;
+    // Debugging: Print available methods
+    console.log("Available methods:", contract.methods);
+
+    const data = contract.methods[method](...arrayParams).encodeABI();
 
     const rawTx = {
       nonce: web3.utils.toHex(nonce),

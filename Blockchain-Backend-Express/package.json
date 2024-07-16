@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start-queue": "node queue/transactionWalletQueue.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
@@ -21,13 +22,14 @@
     "@ethereumjs/tx": "^5.2.1",
     "@upstash/redis": "^1.28.4",
     "body-parser": "^1.20.2",
-    "bull": "^4.12.2",
+    "bull": "^4.15.1",
     "chalk": "^5.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
     "express-validator": "^7.0.1",
     "fastq": "^1.17.1",
+    "ioredis": "^5.4.1",
     "json-bigint": "^1.0.0",
     "path": "^0.12.7",
     "pug": "^3.0.2",
@@ -35,7 +37,7 @@
     "request": "^2.79.0",
     "solc": "^0.8.16",
     "vercel": "^33.5.5",
-    "web3": "^4.6.0",
+    "web3": "^4.10.0",
     "yarn": "^1.22.22"
   },
   "devDependencies": {

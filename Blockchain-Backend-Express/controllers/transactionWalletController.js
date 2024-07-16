@@ -2,34 +2,34 @@ import { validationResult } from "express-validator";
 
 // service
 import {
-  getAllTransaction as getAllTransactionService,
-  addTransaction as addTransactionService,
-  getTransactionByUserId as getTransactionByUserIdService,
-  getCountTransaction as getCountTransactionService,
-  getBalanceByUserId as getBalanceByUserIdService,
-} from "../services/transactionService.js";
+  getAllWalletTransaction as getAllWalletTransactionService,
+  addWalletTransaction as addWalletTransactionService,
+  getWalletTransactionByUserId as getWalletTransactionByUserIdService,
+  getCountWalletTransaction as getCountWalletTransactionService,
+  getWalletBalanceByUserId as getWalletBalanceByUserIdService,
+} from "../services/transactionWalletService.js";
 
 // request validation
-import { validateAddTransaction } from "../requests/transactionRequest.js";
+import { validateAddWalletTransaction } from "../requests/transactionWalletRequest.js";
 
 // queue
-import { addTransactionToQueue } from "../queue/transactionQueue.js";
+import { addWalletTransactionToQueue } from "../queue/transactionWalletQueue.js";
 import { consoleForDevelop } from "../config/app.js";
 
 // GET
 export const getWalletTransactions = async (req, res) => {
-  consoleForDevelop("Get Transactions Process [Controller]", "header");
+  consoleForDevelop("Get Wallet Transactions Process [Controller]", "header");
   try {
-    const transactions = await getAllTransactionService();
+    const transactions = await getAllWalletTransactionService();
     if (transactions.length === 0) {
-      return res.status(404).json({ error: "Transaction not found" });
+      return res.status(404).json({ error: "Wallet transaction not found" });
     }
     return res.status(200).json({
-      message: "Transactions fetched successfully",
+      message: "Wallet transactions fetched successfully",
       data: transactions,
     });
   } catch (error) {
-    console.error("Error fetching transactions:", error);
+    console.error("Error fetching wallet transactions:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -37,12 +37,12 @@ export const getWalletTransactions = async (req, res) => {
 export const getWalletTransactionByUserId = async (req, res) => {
   consoleForDevelop("Get Transaction by UserId Process [Controller]", "header");
   try {
-    const transactions = await getTransactionByUserIdService(req.params.userId);
+    const transactions = await getWalletTransactionByUserIdService(req.params.userId);
     if (transactions.length === 0) {
-      return res.status(404).json({ error: "Transaction not found" });
+      return res.status(404).json({ error: "Wallet transaction not found" });
     }
     return res.status(200).json({
-      message: "Transactions fetched successfully",
+      message: "Wallet transactions fetched successfully",
       data: transactions,
     });
   } catch (error) {
@@ -51,27 +51,27 @@ export const getWalletTransactionByUserId = async (req, res) => {
   }
 };
 
-export const getWalletCountTransaction = async (req, res) => {
-  consoleForDevelop("Get Count Transaction Process [Controller]", "header");
+export const getCountWalletTransaction = async (req, res) => {
+  consoleForDevelop("Get Count Wallet Transaction Process [Controller]", "header");
   try {
-    const count = await getCountTransactionService();
+    const count = await getCountWalletTransactionService();
     return res.status(200).json({
-      message: "Transaction count fetched successfully",
+      message: "Wallet transaction count fetched successfully",
       data: count,
     });
   } catch (error) {
-    console.error("Error fetching transaction count:", error);
+    console.error("Error fetching wallet transaction count:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 // POST
 export const addWalletTransaction = async (req, res) => {
-  consoleForDevelop("Add Transaction Process [Controller]", "header");
+  consoleForDevelop("Add Wallet Transaction Process [Controller]", "header");
   try {
-    consoleForDevelop("Validating transaction data [Controller]");
+    consoleForDevelop("Validating wallet transaction data [Controller]");
     await Promise.all(
-      validateAddTransaction.map((validator) => validator.run(req))
+      validateAddWalletTransaction.map((validator) => validator.run(req))
     );
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -81,27 +81,29 @@ export const addWalletTransaction = async (req, res) => {
     const {
       userId,
       amount,
+      paymentMethodDetailId,
       transactionType,
       status,
       code,
       createdAt,
     } = req.body;
 
-    await addTransactionService({
+    await addWalletTransactionService({
       userId,
       amount,
+      paymentMethodDetailId,
       transactionType,
       status,
       code,
       createdAt,
     });
 
-    addTransactionToQueue(req.body);
+    addWalletTransactionToQueue (req.body);
     return res.status(200).json({
-      message: "Transaction add in progress...",
+      message: "Wallet transaction add in progress...",
     });
   } catch (error) {
-    console.error("Error adding transaction:", error);
+    console.error("Error adding wallet transaction:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -109,7 +111,7 @@ export const addWalletTransaction = async (req, res) => {
 export const getWalletBalanceByUserId = async (req, res) => {
   consoleForDevelop("Get Balance by UserId Process [Controller]", "header");
   try {
-    const balance = await getBalanceByUserIdService(req.params.userId);
+    const balance = await getWalletBalanceByUserIdService(req.params.userId);
     return res.status(200).json({
       message: "Balance fetched successfully",
       data: balance,

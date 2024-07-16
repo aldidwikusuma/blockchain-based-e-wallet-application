@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Top Up Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5 mx-auto form my-5">
+            <h4 class="mt-5 text-center">Top Up</h4>
+            <hr class="my-2">
+            <form id="topUpForm">
+                <div class="mb-3">
+                    <label for="userId" class="form-label">User ID</label>
+                    <input type="text" class="form-control" id="userId" name="userId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount (in IDR)</label>
+                    <input type="number" class="form-control" id="amount" name="amount" required>
+                </div>
+                <div class="mb-3">
+                    <label for="paymentMethodDetailId" class="form-label">Payment Method Detail ID</label>
+                    <select class="form-select" id="paymentMethodDetailId" name="paymentMethodDetailId">
+                        <option value="1" selected>Method 1</option>
+                        <!-- Add other payment method options here if needed -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Top Up</button>
+                <a href="/test/menu" class="btn btn-secondary">Back</a>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $(document).ready(function () {
+            $('#topUpForm').submit(function (event) {
+                event.preventDefault();
+
+                var formData = {
+                    userId: $('#userId').val(),
+                    amount: $('#amount').val(),
+                    paymentMethodDetailId: $('#paymentMethodDetailId').val(),
+                    code: generateCode() // Function to generate code, replace with your implementation
+                };
+
+                // Example AJAX submission (replace with your actual submission method)
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/topup',
+                    headers: {
+                        "Authorization": "abc"
+                    },
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Top-up successful! Transaction code: ' + formData.code);
+                        // Optionally, redirect or update UI after successful top-up
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Failed to process top-up. Please try again later.');
+                    }
+                });
+            });
+
+            function generateCode() {
+                // Example function to generate a unique transaction code
+                // Replace with your actual code generation logic
+                return 'TRX-' + Math.floor(Math.random() * 10000);
+            }
+        });
+    </script>
+</body>
+
+</html>

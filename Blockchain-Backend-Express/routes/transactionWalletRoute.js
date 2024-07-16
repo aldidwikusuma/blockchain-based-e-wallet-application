@@ -2,20 +2,20 @@ import express from "express";
 import {
   getWalletTransactions,
   getWalletTransactionByUserId,
-  getWalletCountTransaction,
+  getCountWalletTransaction,
   getWalletBalanceByUserId,
   addWalletTransaction,
 } from "../controllers/transactionWalletController.js";
-// import { validateTokenMiddleware } from "../config/app.js";
-import validateTokenMiddleware from "../middleware/validateToken.js";
+
+import { validateTokenGeneral } from "../middleware/validateToken.js";
 
 const router = express.Router();
 
-router.use(validateTokenMiddleware);
+router.use(validateTokenGeneral);
 
 router.get("/", getWalletTransactions);
 router.get("/userId/:userId", getWalletTransactionByUserId);
-router.get("/count", getWalletCountTransaction);
+router.get("/count", getCountWalletTransaction);
 router.get("/balance/:userId", getWalletBalanceByUserId);
 
 router.post("/", addWalletTransaction);

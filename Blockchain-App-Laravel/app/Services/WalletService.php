@@ -22,6 +22,18 @@ class WalletService
             'code' => self::generateCode($type),
         ];
         $data = WalletTransactionUser::create($data);
+        
+        $postData = [
+                    'userId' => auth()->id(),
+                    'amount' => $data->amount,
+                    'payment_method_detail_id' => $data['payment_method_detail_id'],
+                    'transactionType' => $type,
+                    'status' => 'accepted',
+                    'code' => self::generateCode($type),
+                    'createdAt' => date('c')
+                ];
+        self::postTransaction($postData);
+        
         return $data;
     }
 
@@ -52,6 +64,7 @@ class WalletService
     public static function getWalletTransactionById($walletTransactionId)
     {
         return WalletTransactionUser::find($walletTransactionId);
+        
     }
 
     public static function ajaxDatatableByUser()
@@ -70,31 +83,40 @@ class WalletService
         $topup->save();
     }
 
-    // public static function acceptWalletTransaction($topUpWalletId)
-    // {
-    //     $topup = WalletTransactionUser::find($topUpWalletId);
-    //     $topup->update(['status' => 'accepted']);
-    //     self::updateUserBallance($topup->user_id, $topup->amount, 'topup');
-    //     $topup->save();
-    // }
-
     public static function acceptWalletTransaction($topUpWalletId)
-{
-    $topup = WalletTransactionUser::find($topUpWalletId);
-    $transactionType = self::generateCode('topup');
-    $topup->update(['status' => 'accepted']);
-    $topup->save();
+    {
+        $topup = WalletTransactionUser::find($topUpWalletId);
+        $topup->update(['status' => 'accepted']);
+        self::updateUserBallance($topup->user_id, $topup->amount, 'topup');
+        $topup->save();
+    }
 
-    $postData = [
-        'userId' => $topup->auth()->user()->id,
-        'transactionType' => $transactionType,
-        'status' => 'accepted',
-        'amount' => $topup->amount,
-        'createdAt' => date('c')
-    ];
-    self::postTransaction($postData);
-    self::updateUserBallance($topup->user_id, $topup->amount, $transactionType);
-}
+//     public static function acceptWalletTransaction($topUpWalletId)
+// {
+//     $topup = WalletTransactionUser::find($topUpWalletId);
+//     $transactionType = 'topup'; // Adjust the type as necessary
+//     $topup->update(['status' => 'accepted']);
+//     $topup->save();
+    
+//     $postData = [
+//         'userId' => $topup->user_id,
+//         'transactionType' => 'Top Up',
+//         'status' => 'accepted',
+//         'amount' => $topup->amount,
+//         'createdAt' => date('c')
+//     ];
+
+//     $response = self::postTransaction($postData);
+
+//     if ($response->success) {
+//         self::updateUserBallance($topup->user_id, $topup->amount, $transactionType);
+//     } else {
+//         // Handle API post failure if needed
+//         throw new \Exception('Failed to post transaction to API');
+//     }
+
+//     return $response;
+// }
 
     private static function updateUserBallance($userId, $totalPrice, $type)
     {
@@ -104,6 +126,7 @@ class WalletService
         } else {
             $user->wallet->withdraw($totalPrice, ['description' => 'Withdraw wallet']);
         }
+
 
     }
 
@@ -133,8 +156,8 @@ class WalletService
     private static function postTransaction(array $data)
     {
         $data['amount'] = (int) $data['amount'];  // Ensure amount is an integer
-        $res = APIHelper::httpPost('addTransaction', $data);
-        return $res;
+        $response = APIHelper::httpPost('addWalletTransaction', $data);
+        return $response;
     }
 
     private static function mappingTransaction($transactionsData, $isSingle = false)
@@ -171,7 +194,7 @@ class WalletService
         return false;
     }
 
-    public static function getTransactionByUserId(){
+    public static function getWalletTransactionByUserId(){
         $transactions = APIHelper::httpGet('getTransactionByUserId', auth()->user()->id);
         if (self::ifTransactionNotFound($transactions)) {
             return [];

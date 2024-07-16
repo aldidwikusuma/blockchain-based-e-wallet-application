@@ -1,6 +1,6 @@
 import {
   // getAllTransactionDetail as getAllTransactionDetailService,
-  addTransactionDetail as addTransactionDetailService,
+  // addTransactionDetail as addTransactionDetailService,
   getPriceFromTransactionDetailByTransactionCode as getPriceFromTransactionDetailByTransactionCodeService,
   getCountTransactionDetailByTransactionCode as getCountTransactionDetailByTransactionCodeService,
   getTransactionDetailByTransactionCode as getTransactionDetailByTransactionCodeService,

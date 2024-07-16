@@ -8,6 +8,15 @@ class APIHelper
     private static $apiToken;
 
     private static $arraySegmentApi = [
+        //get transaction wallet
+        'getWalletTransactions' => '/wallet',
+        'getWalletTransactionByUserId' => '/wallet/userId',
+        'getWalletCountTransaction' => '/wallet/count',
+        'getWalletBalanceByWalletId' => '/wallet/userId',
+
+        //post transaction wallet
+        'addWalletTransaction' => '/wallet',
+
         // get transaction
         'getAllTransactions' => '/transactions',
         'getTransactionDetails' => '/transaction-details',
@@ -15,17 +24,6 @@ class APIHelper
         'getTransactionByFromToUserId' => '/transactions/fromToUserId',
         'getTransactionByCampaignId' => '/transactions/campaignId',
         'getCountTransaction' => '/transactions/count',
-
-        //get transaction
-        'getAllTransactions' => '/wallets',
-        'getTransactionsByWalletId' => '/transactions/walletId',
-        'getTransactionByOwnerId' => '/transactions/userId',
-        'getCountTransaction' => '/transactions/count',
-        'getBalanceByWalletId' => '/transactions/walletId',
-
-        //post transaction
-        'addTransaction' => '/wallets',
-
 
         // post transaction
         'addTransaction' => '/transactions',

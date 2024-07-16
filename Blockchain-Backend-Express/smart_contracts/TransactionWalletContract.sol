@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
-contract WalletTransactionContract {
+contract TransactionWalletContract {
     struct Transaction {
         string userId;
         int256 amount;
@@ -9,6 +9,7 @@ contract WalletTransactionContract {
         string status;
         string code;
         uint createdAt;
+        uint paymentMethodDetailId; 
     }
 
     mapping(string => Transaction[]) private userTransactions;
@@ -17,27 +18,33 @@ contract WalletTransactionContract {
     event TransactionAdded(
         string userId,
         int256 amount,
+        uint paymentMethodDetailId,
         string transactionType,
         string status,
         string code,
         uint createdAt
+        
     );
 
-    function addTransaction(
+    function addWalletTransaction(
         string memory _userId,
         int256 _amount,
+        uint _paymentMethodDetailId,
         string memory _transactionType,
         string memory _status,
         string memory _code,
         uint _createdAt
+        
     ) public {
         Transaction memory newTransaction = Transaction({
             userId: _userId,
             amount: _amount,
+            paymentMethodDetailId: _paymentMethodDetailId,
             transactionType: _transactionType,
             status: _status,
             code: _code,
             createdAt: _createdAt
+            
         });
 
         userTransactions[_userId].push(newTransaction);
@@ -46,6 +53,7 @@ contract WalletTransactionContract {
         emit TransactionAdded(
             _userId,
             _amount,
+            _paymentMethodDetailId,
             _transactionType,
             _status,
             _code,
@@ -53,19 +61,19 @@ contract WalletTransactionContract {
         );
     }
 
-    function getTransactionsByUserId(string memory _userId) public view returns (Transaction[] memory) {
+    function getWalletTransactionsByUserId(string memory _userId) public view returns (Transaction[] memory) {
         return userTransactions[_userId];
     }
 
-    function getAllTransactions() public view returns (Transaction[] memory) {
+    function getAllWalletTransactions() public view returns (Transaction[] memory) {
         return allTransactions;
     }
 
-    function getCountTransaction() public view returns (uint256) {
+    function getCountWalletTransaction() public view returns (uint256) {
         return allTransactions.length;
     }
 
-    function getBalanceByUserId(string memory _userId) public view returns (int256) {
+    function getWalletBalanceByUserId(string memory _userId) public view returns (int256) {
         int256 balance = 0;
         Transaction[] memory transactions = userTransactions[_userId];
         for (uint256 i = 0; i < transactions.length; i++) {
